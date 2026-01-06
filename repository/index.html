@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AndreaAI v5.0 - Sistema Neural Completo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- BARRA LATERAL - NAVEGACIÓN -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-brain gradient-text"></i>
+                <span>Andrea<span class="gradient-text">AI</span> <small class="version">v5.0</small></span>
+            </div>
+
+            <button class="btn-new-chat" onclick="window.resetAll()">
+                <i class="fas fa-redo"></i> Reiniciar Todo
+            </button>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-section="chat">
+                    <i class="fas fa-comment-dots"></i> Chat Neural
+                </div>
+                <div class="nav-item" data-section="conciencia">
+                    <i class="fas fa-project-diagram"></i> Conciencia
+                </div>
+                <div class="nav-item" data-section="stats">
+                    <i class="fas fa-chart-bar"></i> Estadísticas
+                </div>
+                <div class="nav-item" data-section="config">
+                    <i class="fas fa-cog"></i> Sistema
+                </div>
+            </nav>
+
+            <div class="user-status">
+                <div class="status-header">
+                    <span id="user-level-display">Nivel 1</span>
+                    <span id="xp-text" class="xp-text">0 XP</span>
+                </div>
+                <div class="progress-container">
+                    <div id="xp-progress-bar" class="progress-bar"></div>
+                </div>
+                <div class="personality-preview">
+                    <small><i class="fas fa-dna"></i> Rasgos activos:</small>
+                    <span id="personality-display" class="personality-text">Neutra</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn-reset" onclick="window.resetAll()">
+                    <i class="fas fa-eraser"></i> Reset Total
+                </button>
+            </div>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+        <main class="content-area">
+            <!-- CHAT NEURAL -->
+            <section id="chat-section" class="content-section active">
+                <div class="chat-header">
+                    <h2><i class="fas fa-comments"></i> Conversación Neural</h2>
+                    <div class="chat-actions">
+                        <button class="btn-chat-action" id="clear-chat" title="Borrar historial">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="btn-chat-action" id="export-chat" title="Exportar chat">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-box" class="chat-container">
+                    <div class="empty-state">
+                        <i class="fas fa-microchip empty-icon"></i>
+                        <h2>AndreaAI v5.0</h2>
+                        <p>Sistema neural completo con todas las funciones</p>
+                        <div class="empty-hints">
+                            <span class="hint">💡 Pregunta: "¿quién te creó?"</span>
+                            <span class="hint">🧠 Comando: /preset [nombre]</span>
+                            <span class="hint">🗑️ Comando: /clear</span>
+                            <span class="hint">🎤 Comando: /voice</span>
+                            <span class="hint">📤 Comando: /export [formato]</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="user-input" placeholder="Escribe un mensaje o comando..." rows="1"></textarea>
+                        <button id="voice-command-btn" class="voice-btn" title="Comandos de voz (Ctrl+Shift+V)">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button id="send-btn" title="Enviar (Enter)">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="input-hints">
+                        <span><i class="fas fa-lightbulb"></i> Usa /preset [nombre] para cargar personalidades | Ctrl+F para buscar | Ctrl+E para exportar</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONCIENCIA (MAPA MENTAL) -->
+            <section id="conciencia-section" class="content-section">
+                <div class="map-header">
+                    <h2><i class="fas fa-brain-circuit"></i> Mapa de Conciencia</h2>
+                    <div class="map-controls">
+                        <div class="map-stats" id="mind-stats">
+                            <span><i class="fas fa-circle-nodes"></i> Nodos: 0</span>
+                            <span><i class="fas fa-link"></i> Conexiones: 0</span>
+                        </div>
+                        <div class="zoom-controls">
+                            <button id="zoom-out" class="zoom-btn" title="Alejar">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button id="reset-view" class="zoom-btn" title="Restablecer vista">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <button id="zoom-in" class="zoom-btn" title="Acercar">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
+                        <div class="map-actions">
+                            <button class="btn-map-action" id="clear-map" title="Limpiar mapa (Ctrl+C)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mind-map-wrapper">
+                    <!-- BARRA IZQUIERDA: PESTAÑAS DE CATEGORÍAS -->
+                    <div class="inventory-sidebar left">
+                        <div class="sidebar-header">
+                            <h3><i class="fas fa-layer-group"></i> Categorías</h3>
+                        </div>
+                        <div class="category-tabs" id="category-tabs-left">
+                            <!-- Generado por JS -->
+                        </div>
+                        <div class="category-content" id="category-content-left">
+                            <!-- Generado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- CENTRO: MAPA MENTAL -->
+                    <div class="map-center">
+                        <div class="map-instructions">
+                            <span><i class="fas fa-hand-pointer"></i> Arrastra nodos</span>
+                            <span><i class="fas fa-link"></i> Click en ··· para conectar</span>
+                            <span><i class="fas fa-mouse"></i> Rueda para zoom</span>
+                            <span><i class="fas fa-mouse-pointer"></i> Doble clic para agrupar</span>
+                        </div>
+                        <div id="mind-map-canvas">
+                            <svg id="mind-map-svg"></svg>
+                        </div>
+                        <div id="connection-mode" class="connection-mode">
+                            <i class="fas fa-link"></i> Modo conexión activo
+                            <button class="btn-cancel" onclick="window.mindMap && window.mindMap.cancelSelection()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BARRA DERECHA: MÁS CATEGORÍAS Y HERRAMIENTAS -->
+                    <div class="inventory-sidebar right">
+                        <div class="sidebar-header">
+                            <h3><i class="fas fa-cogs"></i> Herramientas</h3>
+                        </div>
+                        <div class="category-tabs" id="category-tabs-right">
+                            <!-- Generado por JS -->
+                        </div>
+                        <div class="category-content" id="category-content-right">
+                            <!-- Generado por JS -->
+                        </div>
+                        
+                        <!-- Sección de Grupos (generada por JS) -->
+                        
+                        <div class="presets-section">
+                            <div class="presets-header">
+                                <i class="fas fa-magic"></i>
+                                <h4>Presets Rápidos</h4>
+                            </div>
+                            <div class="presets-grid">
+                                <button class="preset-btn" data-preset="analitico">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Analítico</span>
+                                </button>
+                                <button class="preset-btn" data-preset="creativo">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <span>Creativo</span>
+                                </button>
+                                <button class="preset-btn" data-preset="empatico">
+                                    <i class="fas fa-heart"></i>
+                                    <span>Empático</span>
+                                </button>
+                                <button class="preset-btn" data-preset="lider">
+                                    <i class="fas fa-crown"></i>
+                                    <span>Líder</span>
+                                </button>
+                                <button class="preset-btn" data-preset="tecnico">
+                                    <i class="fas fa-code"></i>
+                                    <span>Técnico</span>
+                                </button>
+                                <button class="preset-btn" data-preset="filosofo">
+                                    <i class="fas fa-book"></i>
+                                    <span>Filósofo</span>
+                                </button>
+                                <button class="preset-btn" data-preset="artista">
+                                    <i class="fas fa-palette"></i>
+                                    <span>Artista</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESTADÍSTICAS AVANZADAS -->
+            <section id="stats-section" class="content-section">
+                <div class="stats-header">
+                    <h2><i class="fas fa-chart-pie"></i> Estadísticas Avanzadas</h2>
+                    <div class="stats-actions">
+                        <button class="btn-stats-action" onclick="window.mindMap && window.mindMap.showAdvancedStats()">
+                            <i class="fas fa-chart-bar"></i> Ver Estadísticas
+                        </button>
+                        <button class="btn-stats-action" onclick="window.mindMap && window.mindMap.exportStats()">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-content">
+                    <div class="stats-overview" id="stats-overview">
+                        <!-- Generado por JS -->
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card large">
+                            <h3><i class="fas fa-project-diagram"></i> Evolución del Mapa</h3>
+                            <div class="history-graph-placeholder">
+                                <p>Los datos de evolución se generan automáticamente mientras trabajas con el mapa.</p>
+                                <button class="btn-primary-custom" onclick="window.mindMap && window.mindMap.showAdvancedStats()">
+                                    Ver Gráficos Completos
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3><i class="fas fa-sitemap"></i> Densidad de Red</h3>
+                            <div class="density-meter">
+                                <div class="meter-value" id="density-value">0%</div>
+                                <div class="meter-bar">
+                                    <div class="meter-fill" id="density-fill"></div>
+                                </div>
+                                <small>Conectividad total del mapa</small>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3><i class="fas fa-trophy"></i> Top Nodos</h3>
+                            <div class="top-nodes-list" id="top-nodes-list">
+                                <div class="loading-stats">Cargando estadísticas...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONFIGURACIÓN/SISTEMA -->
+            <section id="config-section" class="content-section">
+                <div class="config-grid">
+                    <div class="config-card">
+                        <h2><i class="fas fa-key"></i> Configuración del Sistema</h2>
+                        <p>AndreaAI está configurada con API Key predefinida para OpenRouter.</p>
+                        <div class="api-status-card">
+                            <div class="status-indicator active">
+                                <i class="fas fa-check-circle"></i>
+                                <span>API Configurada Correctamente</span>
+                            </div>
+                            <div class="api-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-server"></i>
+                                    <span>Proveedor: OpenRouter</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-robot"></i>
+                                    <span>Modelo: <span id="current-model">xiaomi/mimo-v2-flash:free</span></span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-key"></i>
+                                    <span>API Key: Configurada en código</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h2><i class="fas fa-sliders-h"></i> Preferencias</h2>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <span><i class="fas fa-eye"></i> Mostrar nombres completos</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="show-full-names" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span><i class="fas fa-crosshairs"></i> Auto-centrar nodos nuevos</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="auto-center" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span><i class="fas fa-volume-up"></i> Sonidos de interacción</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="sound-effects">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span><i class="fas fa-palette"></i> Colores por categoría</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="category-colors" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span><i class="fas fa-microphone"></i> Comandos de voz</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="voice-commands" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span><i class="fas fa-history"></i> Guardar historial estadísticas</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="save-stats" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="storage-info">
+                            <h4><i class="fas fa-database"></i> Almacenamiento Local</h4>
+                            <div class="storage-bar">
+                                <div class="storage-fill" id="storage-fill"></div>
+                            </div>
+                            <small><span id="storage-used">0 KB</span> usados de 5MB</small>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h2><i class="fas fa-info-circle"></i> Información del Sistema</h2>
+                        <div class="about-content">
+                            <div class="about-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span>Versión: 1.0.0</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>Nodos disponibles: 52</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>Categorías: 5</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-object-group"></i>
+                                    <span>Grupos visuales: Sí</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Estadísticas avanzadas: Sí</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-microphone"></i>
+                                    <span>Comandos de voz: Sí</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Creador: IsaDetaSeek</span>
+                                </div>
+                            </div>
+                            <div class="system-actions">
+                                <button class="btn-system" onclick="window.app && window.app.showSection('conciencia')">
+                                    <i class="fas fa-project-diagram"></i> Ir al Mapa
+                                </button>
+                                <button class="btn-system" onclick="window.app && window.app.showSection('stats')">
+                                    <i class="fas fa-chart-bar"></i> Ver Estadísticas
+                                </button>
+                                <button class="btn-system secondary" onclick="window.resetAll()">
+                                    <i class="fas fa-redo"></i> Reiniciar Todo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ÁREA DE NOTIFICACIONES -->
+    <div id="notification-area"></div>
+
+    <!-- Scripts en el ORDEN CORRECTO -->
+    <script src="andrea-app.js"></script>
+    <script src="auth-system.js"></script>
+</body>
+</html>
